@@ -37,6 +37,20 @@ spec:
         value: $(params.branch)
       runAfter:
         - init
+
+    - name: lint
+      workspaces:
+        - name: source
+          workspace: pipeline-workspace
+      taskRef:
+        name: flake8
+      params:
+      - name: image
+        value: "python:3.9-slim"
+      - name: args
+        value: ["--count","--max-complexity=10","--max-line-length=127","--statistics"]
+      runAfter:
+        - clone
     
     - name: tests
       workspaces:
@@ -52,17 +66,6 @@ spec:
       runAfter:
         - clone
 
-    
-    - name: lint
-      workspaces:
-        - name: source
-          workspace: pipeline-workspace
-      taskRef:
-        name: flake8
-      params:
-      - name: args
-        value: "service --count --select=E9,F63,F7,F82 --show-source --statistics"
-
     - name: build
       workspaces:
         - name: source
@@ -76,7 +79,7 @@ spec:
       runAfter:
         - tests
         - lint
-        
+
     - name: deploy
       workspaces:
         - name: manifest-dir
